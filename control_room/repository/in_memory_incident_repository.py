@@ -2,10 +2,10 @@
 
 from typing import Optional, List
 from control_room.model.incident import Incident
-from control_room.repository.base_repository import BaseRepository
+from control_room.repository.incident_repository import IncidentRepository
 
 
-class InMemoryIncidentRepository(BaseRepository):
+class InMemoryIncidentRepository(IncidentRepository):
     """In-memory implementation of Incident repository using dictionary storage"""
     
     def __init__(self):

@@ -1,4 +1,4 @@
-"""Base repository interface for common repository operations"""
+"""Incident repository interface for common repository operations"""
 
 from abc import ABC, abstractmethod
 from typing import TypeVar, Optional, List
@@ -6,7 +6,7 @@ from typing import TypeVar, Optional, List
 T = TypeVar('T')
 
 
-class BaseRepository(ABC):
+class IncidentRepository(ABC):
     """Abstract base repository interface defining common CRUD operations"""
     
     @abstractmethod

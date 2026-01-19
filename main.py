@@ -7,7 +7,7 @@ import logging
 from control_room.api.incident_api import init_control_room_api
 from control_room.service.incident_service import IncidentService
 from control_room.repository.in_memory_incident_repository import InMemoryIncidentRepository
-from control_room.repository.base_repository import BaseRepository
+from control_room.repository.incident_repository import IncidentRepository
 
 # ERT imports
 from ert.api.unit_api import init_ert_api
@@ -39,7 +39,7 @@ def create_app():
     # You can switch between implementations here:
     # - InMemoryIncidentRepository: For testing/development
     # - SQLIncidentRepository: For production (when implemented)
-    incident_repository: BaseRepository = InMemoryIncidentRepository()
+    incident_repository: IncidentRepository = InMemoryIncidentRepository()
     
     unit_repository = UnitRepository()
     
