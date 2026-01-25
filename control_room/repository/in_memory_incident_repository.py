@@ -1,5 +1,3 @@
-"""In-memory implementation of Incident repository (for testing/development)"""
-
 from abc import abstractmethod
 from typing import Optional, List
 from control_room.model.incident import Incident
@@ -8,7 +6,7 @@ from control_room.repository.incident_repository import IncidentRepository
 
 class InMemoryIncidentRepository(IncidentRepository):
     """In-memory implementation of Incident repository using dictionary storage"""
-    
+
     def __init__(self):
         self._storage: dict[str, Incident] = {}
 
@@ -26,15 +24,15 @@ class InMemoryIncidentRepository(IncidentRepository):
 
     def get_by_id(self, entity_id: str) -> Optional[Incident]:
         """
-        Retrieve entity by ID
+        Retrieve entity by ID from storage
         
         Args:
-            entity_id: ID of the entity
+            entity_id: ID of the entity to retrieve
         
         Returns:
-            Entity object or None if not found
+            Entity object if found, None otherwise
         """
-        pass
+        return self._storage.get(entity_id)
 
     def update(self, entity: Incident) -> Incident:
         """

@@ -25,6 +25,18 @@ class IncidentService:
         """
         pass
     
+    def get_incident_by_id(self, incident_id: str):
+        """
+        Retrieve incident by ID from repository
+        
+        Args:
+            incident_id: ID of the incident to retrieve
+        
+        Returns:
+            Incident object if found, None otherwise
+        """
+        return self.incident_repository.get_by_id(incident_id)
+    
     def dispatch_incident(self, incident_id: str, unit_ids: list):
         """
         Dispatch incident to specific ERT vehicles
