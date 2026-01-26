@@ -2,6 +2,10 @@
 
 from flask import Flask
 import logging
+from control_room.api.incident_api import control_room_bp, init_control_room_api
+from control_room.service.incident_service import IncidentService
+from control_room.repository.in_memory_incident_repository import InMemoryIncidentRepository
+from communication import CommunicationChannel
 
 # Configure logging
 logging.basicConfig(
@@ -21,17 +25,18 @@ def create_app():
     # TODO: Initailize persistent incident repository (database, file, etc.)
 
     logger.info("Initializing communication channel...")
-    # TODO: Initailize communication channel
+    incident_repository = InMemoryIncidentRepository()
+    communication_channel = None
 
     logger.info("Initializing services...")
-    # TODO: Initialize services 
+    incident_service = IncidentService(incident_repository=incident_repository, communication_channel=communication_channel)
     
     logger.info("Registering blueprints...")
     # TODO:Initialize and register blueprints
-    # control_room_bp = init_control_room_api(incident_service)
+    control_room_bp = init_control_room_api(incident_service)
     # ert_bp = init_ert_api(unit_service)
-    
-    # app.register_blueprint(control_room_bp, url_prefix='/cr')
+
+    app.register_blueprint(control_room_bp, url_prefix='/cr')
     # app.register_blueprint(ert_bp, url_prefix='/ert')
     
     # Health check endpoint
