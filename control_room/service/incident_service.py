@@ -13,17 +13,28 @@ class IncidentService:
         self.incident_repository = incident_repository
         self.communication_channel = communication_channel
     
-    def create_incident(self, coordinates: tuple):
+    def create_incident(self, x, y: float) -> Incident:
         """
         Create a new incident in the system
         
         Args:
-            coordinates: Tuple of (x, y) coordinates
+            x: X coordinate
+            y: Y coordinate
         
         Returns:
             Created incident object
         """
-        pass
+        incident = Incident(
+            x=x,
+            y=y,
+            status=IncidentStatus.CREATED
+        )
+        created_incident = self.incident_repository.create(incident)
+
+        # Notify ERT units about the new incident
+        # self.communication_channel.notify_units_new_incident(created_incident)
+        
+        return created_incident
     
     def get_incident_by_id(self, incident_id: str):
         """
