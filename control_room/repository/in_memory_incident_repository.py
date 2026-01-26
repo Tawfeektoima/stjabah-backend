@@ -1,4 +1,6 @@
 """In-memory implementation of Incident repository (for testing/development)"""
+import uuid
+import datetime
 from abc import abstractmethod
 from typing import Optional, List
 from control_room.model.incident import Incident
@@ -21,6 +23,10 @@ class InMemoryIncidentRepository(IncidentRepository):
         Returns:
             Created entity with ID
         """
+        # set id and created_at
+        entity.id = str(uuid.uuid4())
+        entity.created_at = datetime.datetime.utcnow()
+
         self._storage[entity.id] = entity
         return entity
 
