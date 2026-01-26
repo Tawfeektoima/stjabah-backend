@@ -70,3 +70,4 @@ class IncidentRepository(ABC):
             List of all entities
         """
         pass
+    

@@ -1,8 +1,8 @@
 """API handlers for Control Room incident endpoints"""
-
+from control_room.model.incident import Incident
 from flask import Blueprint, request, jsonify
 import logging
-
+from control_room.repository.in_memory_incident_repository import InMemoryIncidentRepository
 from control_room.service.incident_service import IncidentService
 from control_room.model.incident import Incident
 
@@ -33,6 +33,17 @@ def get_incident_by_id(incident_id: str):
         return jsonify({
             'error': 'Internal server error'
         }), 500
+
+@control_room_bp.route('/incidents', methods=['GET'])
+def list_incidents():
+    try:
+        incidents = control_room_bp.incident_service.get_all_incidents()
+        incidents_data = [incident.to_dict() for incident in incidents]
+        
+        return jsonify(incidents_data), 200
+        
+    except Exception as e:
+        logger.error(f"Error listing incidents: {str(e)}")
     
 @control_room_bp.route('/incidents', methods=['POST'])
 def create_incident():

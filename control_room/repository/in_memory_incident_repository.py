@@ -1,3 +1,4 @@
+"""In-memory implementation of Incident repository (for testing/development)"""
 import uuid
 import datetime
 from abc import abstractmethod
@@ -72,4 +73,4 @@ class InMemoryIncidentRepository(IncidentRepository):
         Returns:
             List of all entities
         """
-        pass
+        return list(self._storage.values())
