@@ -20,8 +20,7 @@ class InMemoryIncidentRepository(IncidentRepository):
         Returns:
             Created entity with ID
         """
-        self._storage[entity.id] = entity
-        return entity
+        pass
 
     def get_by_id(self, entity_id: str) -> Optional[Incident]:
         """
@@ -66,4 +65,4 @@ class InMemoryIncidentRepository(IncidentRepository):
         Returns:
             List of all entities
         """
-        return list(self._storage.values())
+        pass

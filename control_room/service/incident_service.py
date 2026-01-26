@@ -4,7 +4,6 @@ import uuid
 from control_room.repository.in_memory_incident_repository import InMemoryIncidentRepository
 from control_room.model.incident import Incident, IncidentStatus
 from communication import CommunicationChannel
-from typing import List
 
 
 class IncidentService:
@@ -70,9 +69,3 @@ class IncidentService:
             status: New status
         """
         pass
-
-    def get_all_incidents(self) -> List[Incident]:
-        """
-        Get all incidents with optional status filtering
-        """
-        return self.incident_repository.get_all()
