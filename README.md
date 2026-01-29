@@ -377,19 +377,19 @@ _Error - Not Found (404):_
 ```
 ---
 ## Setup Instructions
-- Clone the repository and navigate to project directory
+Clone the repository and navigate to project directory
   ```bash
   git clone git@github.com:Shaker-10/S.T.Jabah.git
   ```
-- Install uv package manager
+Install uv package manager
   ```bash
   pip install uv
   ```
-- If not sure if you have it
+If not sure if you have it
   ```bash
   uv --version
   ```
-- Run application
+Run application
   ```bash
   uv run python main.py
   ```
