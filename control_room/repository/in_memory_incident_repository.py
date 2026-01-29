@@ -52,7 +52,10 @@ class InMemoryIncidentRepository(IncidentRepository):
         Returns:
             Updated entity
         """
-        pass
+        if entity.id in self._storage:
+            self._storage[entity.id] = entity
+            return entity
+        raise ValueError(f"Entity with ID {entity.id} does not exist.")
     
     def delete(self, entity_id: str) -> bool:
         """

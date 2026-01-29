@@ -70,16 +70,25 @@ class IncidentService:
             incident_id: ID of the incident to check
         """
         pass
-    
-    def update_incident_status(self, incident_id: str, status: str):
+
+    def update_incident(self, incident_id: str, x: float, y: float):
         """
-        Update incident status
-        
+        Update incident coordinates
+
         Args:
             incident_id: ID of the incident
-            status: New status
+            x: New x coordinate
+            y: New y coordinate
         """
-        pass
+        incident = self.incident_repository.get_by_id(incident_id)
+        if not incident:
+            raise ValueError(f"Incident with ID {incident_id} does not exist.")
+        
+        incident.x = x
+        incident.y = y
+        updated_incident = self.incident_repository.update(incident)
+        return updated_incident
+        
 
     def get_all_incidents(self) -> List[Incident]:
         """

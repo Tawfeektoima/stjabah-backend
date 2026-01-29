@@ -99,3 +99,49 @@ def delete_incident(incident_id):
         return jsonify({"error": "Incident not found"}), 404
     
     return jsonify({"message": "Incident deleted successfully"}), 200
+
+@control_room_bp.route('/incidents/<incident_id>', methods=['PUT'])
+def update_incident(incident_id):
+    """
+    Update incident coordinates
+    Args:
+        incident_id: The unique identifier of the incident to update
+    Returns:
+        200: Incident updated successfully with updated incident data
+    """
+
+    data = request.get_json()
+    if data is None:
+        return jsonify({
+            'error': 'Invalid JSON payload'
+        }), 400
+    
+    if 'x' not in data:
+        return jsonify({
+            'error': 'Missing x coordinate'
+        }), 400
+    
+    if not isinstance(data['x'], (int, float)):
+        return jsonify({
+            'error': 'Invalid x coordinate'
+        }), 400
+
+    if 'y' not in data:
+        return jsonify({
+            'error': 'Missing y coordinate'
+        }), 400
+    
+    if not isinstance(data['y'], (int, float)):
+        return jsonify({
+            'error': 'Invalid y coordinate'
+        }), 400
+    
+    try:
+        incident = control_room_bp.incident_service.update_incident(incident_id, data['x'], data['y'])
+        return jsonify(incident.to_dict()), 200
+
+    except Exception as e:
+        logger.error(f"Error updating incident {incident_id}: {str(e)}")
+        return jsonify({
+            'error': 'Internal server error'
+        }), 500
