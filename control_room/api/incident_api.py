@@ -2,7 +2,6 @@
 from flask import Blueprint, request, jsonify
 import logging
 from control_room.service.incident_service import IncidentService
-from communication.channel import CommunicationChannel
 
 logger = logging.getLogger(__name__)
 
@@ -142,6 +141,35 @@ def update_incident(incident_id):
 
     except Exception as e:
         logger.error(f"Error updating incident {incident_id}: {str(e)}")
+        return jsonify({
+            'error': 'Internal server error'
+        }), 500
+    
+@control_room_bp.route('/incidents/<incident_id>/dispatch', methods=['POST'])
+def dispatch_incident(incident_id):
+    """
+    Dispatch an incident to the Emergency Response Team (ERT)
+    
+    Args:
+        incident_id: The unique identifier of the incident to dispatch
+    
+    Returns:
+        200: Incident dispatched successfully with incident data
+        404: Incident not found with error message
+    """
+    try:
+        incident = control_room_bp.incident_service.dispatch_incident(incident_id)
+        
+        if incident is None:
+            return jsonify({
+                'error': 'Incident not found',
+                'incident_id': incident_id
+            }), 404
+        
+        return jsonify(incident.to_dict()), 200
+    
+    except Exception as e:
+        logger.error(f"Error dispatching incident {incident_id}: {str(e)}")
         return jsonify({
             'error': 'Internal server error'
         }), 500
