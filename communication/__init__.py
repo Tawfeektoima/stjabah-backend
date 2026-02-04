@@ -1,6 +1,6 @@
 """Communication module for abstracting communication between Control Room and ERT"""
 
-from communication.channel import CommunicationChannel
-from communication.message import Message, MessageType
+from communication.communication import Communication
+from communication.websocket_communication import WebSocketCommunication
 
-__all__ = ['CommunicationChannel', 'Message', 'MessageType']
+__all__ = ['Communication', 'WebSocketCommunication']

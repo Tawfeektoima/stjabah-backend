@@ -21,10 +21,10 @@ def create_app():
     
     # Initialize repositories
     logger.info("Initializing repositories...")
-    # TODO: Initailize persistent incident repository (database, file, etc.)
+    incident_repository = InMemoryIncidentRepository()
+
 
     logger.info("Initializing communication channel...")
-    incident_repository = InMemoryIncidentRepository()
     communication_channel = None
 
     logger.info("Initializing services...")

@@ -3,13 +3,13 @@
 import uuid
 from control_room.repository.in_memory_incident_repository import InMemoryIncidentRepository
 from control_room.model.incident import Incident, IncidentStatus
-from communication import CommunicationChannel
+from communication.websocket_communication import WebSocketCommunication
 from typing import List
 
 class IncidentService:
     """Service layer for incident operations"""
     
-    def __init__(self, incident_repository: InMemoryIncidentRepository, communication_channel: CommunicationChannel):
+    def __init__(self, incident_repository: InMemoryIncidentRepository, communication_channel: WebSocketCommunication):
         self.incident_repository = incident_repository
         self.communication_channel = communication_channel
     
@@ -89,7 +89,6 @@ class IncidentService:
         updated_incident = self.incident_repository.update(incident)
         return updated_incident
         
-
     def get_all_incidents(self) -> List[Incident]:
         """
         Get all incidents with optional status filtering
@@ -107,3 +106,34 @@ class IncidentService:
             True if incident was deleted successfully, False if incident was not found
         """
         return self.incident_repository.delete(incident_id)
+    
+    async def dispatch_incident(self, incident_id: str):
+        """
+        Dispatch incident to all vehicles
+        
+        Args:
+            incident_id: ID of the incident        
+        Returns:
+            Dispatch result
+        """
+        incident = self.incident_repository.get_by_id(incident_id)
+
+        if incident is None:
+            raise ValueError(f"Incident with ID {incident_id} does not exist.")
+        
+        # Notify ERT units about the incident and wait for acknowledgment
+        await self.communication_channel.publish(
+            topic="new_incident",
+            message=incident.to_dict()
+        )
+
+        return True
+
+async def handle_location(self, data:dict):
+    print(f"[Control Room] 📍 Vehicle Location: {data}")
+
+async def handle_acknowledgment(self, data:dict):
+    print(f"[Control Room] ✅ Acknowledgment: {data}")
+
+async def handle_resolution(self, data:dict):
+    print(f"[Control Room] 🎉 Resolution: {data}")
