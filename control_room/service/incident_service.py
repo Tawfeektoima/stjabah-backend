@@ -107,6 +107,17 @@ class IncidentService:
         """
         return self.incident_repository.delete(incident_id)
     
+    def get_open_incidents(self) -> List[Incident]:
+        """
+        Get all open incidents (not resolved)
+        
+        Returns:
+            List of open incidents
+        """
+        all_incidents = self.incident_repository.get_all()
+        open_incidents = [incident for incident in all_incidents if incident.status != IncidentStatus.RESOLVED]
+        return open_incidents
+    
     async def dispatch_incident(self, incident_id: str):
         """
         Dispatch incident to all vehicles

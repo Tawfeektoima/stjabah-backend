@@ -82,7 +82,7 @@ class ControlRoomApplication:
                 self.incident_service.handle_location
             )
             await self.communication_channel.subscribe(
-                "Acknowledgment", 
+                "acknowledgment", 
                 self.incident_service.handle_acknowledgment
             )
             await self.communication_channel.subscribe(

@@ -52,6 +52,14 @@ def create_incident():
                 'error': 'Invalid JSON payload'
             }), 400
         
+        # Give error if the user try to create a new incident while there is still a one that is not resolved
+        open_incidents = control_room_bp.incident_service.get_open_incidents()
+        if len(open_incidents) > 0:
+            return jsonify({
+                'error': 'There is already an open incident. Please resolve it before creating a new one.',
+                'open_incidents': [incident.to_dict() for incident in open_incidents]
+            }), 400
+        
         if 'x' not in data:
             return jsonify({
                 'error': 'Missing x coordinate'
