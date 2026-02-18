@@ -33,11 +33,15 @@ async def on_new_incident(data):
 ert_comms = WebSocketCommunication()
 
 async def main():
-    # 1. Connect to Hub (Replace localhost with Control Room Domain/IP)
-    await ert_comms.connect("ws://localhost:8765")
-    print(f"[ERT-{ert_id}] Connected to control room hub")
+    # 1. Connect to Hub and register in one call
+    await ert_comms.connect(
+        "ws://localhost:8765",
+        client_type="ert",
+        client_id=ert_id
+    )
+    print(f"[ERT-{ert_id}] Connected and registered with hub")
     
-    # 2. Subscribe to Incidents (wrap callback with ert_id)
+    # 2. Subscribe to Incidents
     await ert_comms.subscribe("new_incident", on_new_incident)
     print(f"[ERT-{ert_id}] Subscribed to incident notifications")
     

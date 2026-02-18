@@ -10,10 +10,20 @@ class WebSocketCommunication(Communication):
         self.subscriptions: Dict[str, List[Callable]] = {}
         self.is_connected = False
 
-    async def connect(self, url: str, **kwargs) -> bool:
+    async def connect(self, url: str, client_type: str = None, client_id: str = None, **kwargs) -> bool:
         try:
             self.connection = await websockets.connect(url, **kwargs)
             self.is_connected = True
+            
+            # If client_type and client_id provided, register immediately
+            if client_type and client_id:
+                msg = {
+                    "type": "register",
+                    "client_type": client_type,
+                    "client_id": client_id
+                }
+                await self.connection.send(json.dumps(msg))
+            
             # Start listening in the background
             asyncio.create_task(self._listen())
             return True

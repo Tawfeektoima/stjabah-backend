@@ -19,6 +19,7 @@ from control_room.service.unit_service import UnitService
 from control_room.api.incident_api import control_room_bp, init_control_room_api
 from communication.websocket_communication import WebSocketCommunication
 from communication.websocket_handlers import WebSocketHandlers
+from control_room.hub_server import main as hub_main
 
 # Configure logging
 logging.basicConfig(
@@ -54,6 +55,7 @@ class ControlRoomApplication:
 
         # Handlers for websocket topics
         self.websocket_handlers = WebSocketHandlers(
+            incident_service=self.incident_service,
             incident_repository=self.incident_repository,
             unit_service=self.unit_service
         )
@@ -90,7 +92,12 @@ class ControlRoomApplication:
         """
         try:
             logger.info("🔌 Connecting to Hub WebSocket server...")
-            await self.communication_channel.connect("ws://localhost:8765")
+            await self.communication_channel.connect(
+                "ws://localhost:8765",
+                client_type="cr",
+                client_id="control_room"
+            )
+            logger.info("📝 Control Room registered with hub")
             
             logger.info("📡 Setting up WebSocket subscriptions...")
             # Subscribe to ERT messages using callbacks from websocket handlers
@@ -144,7 +151,19 @@ class ControlRoomApplication:
         )
     
     def start(self):
-        """Start both Flask and WebSocket in separate threads"""
+        """Start Hub Server, Flask API, and WebSocket in separate threads"""
+        # Start Hub Server in a separate thread
+        def run_hub():
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                loop.run_until_complete(hub_main(self.websocket_handlers))
+            finally:
+                loop.close()
+        
+        hub_thread = threading.Thread(target=run_hub, daemon=False)
+        hub_thread.start()
+        
         # Start Flask in a separate thread
         flask_thread = threading.Thread(target=self.run_flask, daemon=False)
         flask_thread.start()

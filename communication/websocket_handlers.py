@@ -7,7 +7,8 @@ from control_room.model.incident import IncidentStatus
 from typing import Any
 
 class WebSocketHandlers:
-    def __init__(self, incident_repository, unit_service=None):
+    def __init__(self, incident_service, incident_repository, unit_service=None):
+        self.incident_service = incident_service
         self.incident_repository = incident_repository
         self.unit_service = unit_service
 
@@ -30,7 +31,7 @@ class WebSocketHandlers:
                 print(f"[Control Room] ❌ Failed to create ERT Unit: {ert_id} ({e})")
 
         # Add the ert unit to the incident's assigned units list
-        incident = self.incident_repository.get_by_id(incident_id)
+        incident = self.incident_service.get_incident_by_id(incident_id)
         if incident and ert_id not in incident.assigned_units:
             incident.assigned_units.append(ert_id)
             self.incident_repository.update(incident)
@@ -42,3 +43,27 @@ class WebSocketHandlers:
 
     async def handle_resolution(self, data: dict):
         print(f"[Control Room] 🎉 Resolution: {data}")
+
+    async def handle_disconnection(self, ert_id: str):
+        """
+        Handle ERT unit disconnection by removing it from assigned units of open incidents
+        
+        Args:
+            ert_id: The ERT unit ID that disconnected
+        """
+        try:
+            open_incidents = self.incident_service.get_open_incidents()
+            if not open_incidents:
+                print(f"[Control Room] 🚪 ERT Unit {ert_id} disconnected (no open incidents)")
+                return
+            
+            incident = open_incidents[0]
+            if ert_id in incident.assigned_units:
+                incident.assigned_units.remove(ert_id)
+                self.incident_repository.update(incident)
+                print(f"[Control Room] 🚪 ERT Unit {ert_id} disconnected and removed from incident {incident.id}")
+                print(f"[Control Room] Remaining assigned units: {incident.assigned_units}")
+            else:
+                print(f"[Control Room] 🚪 ERT Unit {ert_id} disconnected (was not assigned to incident)")
+        except Exception as e:
+            print(f"[Control Room] ❌ Error handling disconnection for {ert_id}: {e}")

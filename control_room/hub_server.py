@@ -6,25 +6,38 @@ from collections import defaultdict
 # Store subscriptions: topic -> set of connected sockets
 subscriptions = defaultdict(set)
 connected_clients = set()
+client_info = {}  # websocket -> {'type': 'cr'/'ert', 'id': str}
+websocket_handlers = None  # Will be set by cr_main.py
 
 async def handler(websocket):
     print(f"Client connected: {websocket.remote_address}")
     connected_clients.add(websocket)
+    client_id = None
+    client_type = None
+    
     try:
         async for message in websocket:
             data = json.loads(message)
             msg_type = data.get("type")
             topic = data.get("topic")
+            
+            # 0. Handle Client Registration (identify CR or ERT)
+            if msg_type == "register":
+                client_type = data.get("client_type")  # 'cr' or 'ert'
+                client_id = data.get("client_id")  # unit ID or 'control_room'
+                client_info[websocket] = {"type": client_type, "id": client_id}
+                print(f"[HUB SERVER] - Client registered: {client_type.upper()} - {client_id}")
+                continue
 
             # 1. Handle Subscription Requests
             if msg_type == "subscribe":
                 subscriptions[topic].add(websocket)
-                print(f"Client subscribed to '{topic}'")
+                print(f"[HUB SERVER] - Client subscribed to '{topic}'")
 
             # 2. Handle Publish Requests
             elif msg_type == "publish":
                 payload = data.get("payload")
-                print(f"Broadcasting message on '{topic}': {payload}")
+                print(f"[HUB SERVER] - Broadcasting message on '{topic}': {payload}")
                 
                 # Forward the message to everyone subscribed to this topic
                 # EXCLUDING the sender (optional, usually desired)
@@ -43,14 +56,34 @@ async def handler(websocket):
                         await subscriber.send(response)
 
     except websockets.exceptions.ConnectionClosed:
-        print(f"Client disconnected: {websocket.remote_address}")
+        print(f"[HUB SERVER] - Client disconnected: {websocket.remote_address}")
     finally:
         # Cleanup
         connected_clients.remove(websocket)
         for topic in subscriptions:
             subscriptions[topic].discard(websocket)
+        
+        # Handle disconnection for ERT units
+        if websocket in client_info:
+            info = client_info[websocket]
+            client_type = info.get("type")
+            client_id = info.get("id")
+            
+            # Call handler for ERT disconnection to remove from incident assignments
+            if client_type == "ert" and websocket_handlers:
+                try:
+                    # Schedule the handler as a task
+                    task = asyncio.create_task(websocket_handlers.handle_disconnection(client_id))
+                except Exception as e:
+                    print(f"Error handling disconnection for {client_id}: {e}")
+            
+            del client_info[websocket]
 
-async def main():
+async def main(handlers=None):
+    # Set the handlers reference for disconnect handling
+    global websocket_handlers
+    websocket_handlers = handlers
+    
     # Listen on all interfaces (0.0.0.0) on port 8765
     async with websockets.serve(handler, "0.0.0.0", 8765):
         print("Hub Server started on ws://0.0.0.0:8765")
