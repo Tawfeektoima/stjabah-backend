@@ -13,3 +13,5 @@ def init_ert_api(unit_service: UnitService):
     """Initialize the ERT API with service dependencies"""
     ert_bp.unit_service = unit_service
     return ert_bp
+
+
