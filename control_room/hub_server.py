@@ -26,18 +26,18 @@ async def handler(websocket):
                 client_type = data.get("client_type")  # 'cr' or 'ert'
                 client_id = data.get("client_id")  # unit ID or 'control_room'
                 client_info[websocket] = {"type": client_type, "id": client_id}
-                print(f"Client registered: {client_type.upper()} - {client_id}")
+                print(f"[HUB SERVER] - Client registered: {client_type.upper()} - {client_id}")
                 continue
 
             # 1. Handle Subscription Requests
             if msg_type == "subscribe":
                 subscriptions[topic].add(websocket)
-                print(f"Client subscribed to '{topic}'")
+                print(f"[HUB SERVER] - Client subscribed to '{topic}'")
 
             # 2. Handle Publish Requests
             elif msg_type == "publish":
                 payload = data.get("payload")
-                print(f"Broadcasting message on '{topic}': {payload}")
+                print(f"[HUB SERVER] - Broadcasting message on '{topic}': {payload}")
                 
                 # Forward the message to everyone subscribed to this topic
                 # EXCLUDING the sender (optional, usually desired)
@@ -56,7 +56,7 @@ async def handler(websocket):
                         await subscriber.send(response)
 
     except websockets.exceptions.ConnectionClosed:
-        print(f"Client disconnected: {websocket.remote_address}")
+        print(f"[HUB SERVER] - Client disconnected: {websocket.remote_address}")
     finally:
         # Cleanup
         connected_clients.remove(websocket)
