@@ -8,6 +8,7 @@ import logging
 import threading
 from pathlib import Path
 from flask import Flask
+from flask_cors import CORS
 
 # Add parent directory to Python path to resolve imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -67,6 +68,7 @@ class ControlRoomApplication:
         """Create and configure the Flask application"""
         app = Flask(__name__)
         app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
+        CORS(app)
         
         logger.info("📋 Registering Control Room blueprints...")
         control_room_bp_instance = init_control_room_api(self.incident_service, self.unit_service)
