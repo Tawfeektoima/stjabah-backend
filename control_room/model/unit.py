@@ -26,7 +26,6 @@ class Unit:
         self.y = y
         self.status = status or UnitStatus.ACTIVE
 
-
     def to_dict(self) -> dict:
         """Convert unit to dictionary for JSON serialization"""
         return {
