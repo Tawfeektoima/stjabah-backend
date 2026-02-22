@@ -18,7 +18,7 @@ from control_room.service.incident_service import IncidentService
 from control_room.service.unit_service import UnitService
 from control_room.api.incident_api import control_room_bp, init_control_room_api
 from communication.websocket_communication import WebSocketCommunication
-from communication.websocket_handlers import WebSocketHandlers
+from communication.handlers import WebSocketHandlers
 from control_room.hub_server import main as hub_main
 
 # Configure logging
