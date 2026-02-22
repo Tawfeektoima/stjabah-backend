@@ -5,6 +5,7 @@ import logging
 from pathlib import Path
 from service.unit_service import UnitService
 from flask import json, Flask
+from flask_cors import CORS
 
 # Add parent directory to Python path to resolve imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -68,28 +69,29 @@ async def main():
     await ert_comms.subscribe("new_incident", on_new_incident)
     print(f"[ERT-{ert_id}] Subscribed to incident notifications")
     
-    # 3. Simulation Loop (sending location updates)
-    while True:
-        # Simulate GPS coordinates
-        unit_service = UnitService()
-        unit_service.update_gps_location()
+    # Comment out the simulation loop
 
-        # read x and y from unit_info.json file
-        with open("ert/unit_info.json", "r") as f:
-            unit_info = json.load(f)
-            x = unit_info["x"]
-            y = unit_info["y"]
+    # while True:
+    #     # Simulate GPS coordinates
+    #     unit_service = UnitService()
+    #     unit_service.update_gps_location()
 
-        location_data = {
-            "ert_id": ert_id,
-            "x": x,
-            "y": y
-        }   
+    #     # read x and y from unit_info.json file
+    #     with open("ert/unit_info.json", "r") as f:
+    #         unit_info = json.load(f)
+    #         x = unit_info["x"]
+    #         y = unit_info["y"]
+
+    #     location_data = {
+    #         "ert_id": ert_id,
+    #         "x": x,
+    #         "y": y
+    #     }   
         
-        print(f"[ERT-{ert_id}] Sending Location...")
-        await ert_comms.publish("location", location_data)
+    #     print(f"[ERT-{ert_id}] Sending Location...")
+    #     await ert_comms.publish("location", location_data)
         
-        await asyncio.sleep(5)  # Send every 5 seconds
+    #     await asyncio.sleep(5)  # Send every 5 seconds
 
 if __name__ == "__main__":
     # Initialize Unit Service with the connected communication channel
@@ -98,6 +100,7 @@ if __name__ == "__main__":
     # Create Flask app with ERT API
     app = Flask(__name__)
     app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
+    CORS(app)
     
     logger.info("📋 Registering ERT Unit API blueprints...")
     ert_bp_instance = init_ert_api(unit_service)
