@@ -58,7 +58,9 @@ class IncidentService:
         incident.status = IncidentStatus.DISPATCHED
         self.incident_repository.update(incident)
         await self.communication_channel.publish(
-            topic="new_incident",
+
+             topic="incident",
             message=incident.to_dict()
         )
+
         return True
