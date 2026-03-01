@@ -235,9 +235,6 @@ def get_units_for_open_incident():
     try:
         open_incidents = control_room_bp.incident_service.get_open_incidents()
         
-        if not open_incidents:
-            return jsonify({}), 200  # Return empty JSON if no open incidents
-        
         incident = open_incidents[0]
         assigned_units = incident.assigned_units
         # show all the info of the assigned units from the unit service

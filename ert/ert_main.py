@@ -71,27 +71,27 @@ async def main():
     
     # Comment out the simulation loop
 
-    # while True:
-    #     # Simulate GPS coordinates
-    #     unit_service = UnitService()
-    #     unit_service.update_gps_location()
+    while True:
+        # Simulate GPS coordinates
+        unit_service = UnitService()
+        unit_service.update_gps_location()
 
-    #     # read x and y from unit_info.json file
-    #     with open("ert/unit_info.json", "r") as f:
-    #         unit_info = json.load(f)
-    #         x = unit_info["x"]
-    #         y = unit_info["y"]
+        # read x and y from unit_info.json file
+        with open("ert/unit_info.json", "r") as f:
+            unit_info = json.load(f)
+            x = unit_info["x"]
+            y = unit_info["y"]
 
-    #     location_data = {
-    #         "ert_id": ert_id,
-    #         "x": x,
-    #         "y": y
-    #     }   
+        location_data = {
+            "ert_id": ert_id,
+            "x": x,
+            "y": y
+        }   
         
-    #     print(f"[ERT-{ert_id}] Sending Location...")
-    #     await ert_comms.publish("location", location_data)
+        print(f"[ERT-{ert_id}] Sending Location...")
+        await ert_comms.publish("location", location_data)
         
-    #     await asyncio.sleep(5)  # Send every 5 seconds
+        await asyncio.sleep(5)  # Send every 5 seconds
 
 if __name__ == "__main__":
     # Initialize Unit Service with the connected communication channel
