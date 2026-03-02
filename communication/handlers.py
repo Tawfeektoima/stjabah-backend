@@ -5,7 +5,6 @@ the communication layer can subscribe to them directly.
 """
 from control_room.model.incident import IncidentStatus
 from typing import Any
-
 from control_room.model.unit import UnitStatus
 
 class WebSocketHandlers:
@@ -14,18 +13,17 @@ class WebSocketHandlers:
         self.unit_service = unit_service
 
     async def handle_location(self, data: dict):
-        print(f"[Control Room] 📍 Vehicle Location: {data}")
+        print(f"[Control Room] \U0001f4cd Vehicle Location: {data}")
         ert_id = data.get("ert_id")
         x = data.get("x")
         y = data.get("y")
-        # Update unit location in repository if unit service is available
         if self.unit_service:
             try:
                 unit = self.unit_service.get_unit_by_id(ert_id)
                 if unit:
                     self.unit_service.update_unit(ert_id, x, y)
             except Exception as e:
-                print(f"[Control Room] ❌ Failed to update location for {ert_id}: {e}")
+                print(f"[Control Room] \u274c Failed to update location for {ert_id}: {e}")
 
     async def handle_acknowledgment(self, data: dict):
         print(f"[Control Room] \u2705 Acknowledgment: {data}")
@@ -57,7 +55,26 @@ class WebSocketHandlers:
             try:
                 unit = self.unit_service.get_unit_by_id(ert_id)
                 if unit:
+                    incident_id = unit.assigned_incident
                     self.unit_service.resolve_unit(ert_id)
+                    if incident_id:
+                        incident = self.incident_service.get_incident_by_id(incident_id)
+                        if incident:
+                            all_units = self.unit_service.get_all_units()
+                            assigned_units = [
+                                u for u in all_units
+                                if u.assigned_incident == incident_id
+                            ]
+                            all_resolved = len(assigned_units) > 0 and all(
+                                u.status == UnitStatus.RESOLVED
+                                for u in assigned_units
+                            )
+                            if all_resolved:
+                                incident.status = IncidentStatus.RESOLVED
+                                self.incident_repository.update(incident)
+                                print(f"[Control Room] \U0001f389 Incident {incident.id} resolved (all units resolved)")
+                            else:
+                                print(f"[Control Room] \U0001f6a7 Incident {incident.id} still in progress (some units not resolved)")
             except Exception as e:
                 print(f"[Control Room] \u274c Failed to resolve unit {ert_id}: {e}")
                 

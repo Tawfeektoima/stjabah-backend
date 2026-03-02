@@ -1,114 +1,65 @@
 """Business logic for Control Room incident management"""
 
 import uuid
+from typing import List
 from control_room.repository.in_memory_incident_repository import InMemoryIncidentRepository
 from control_room.model.incident import Incident, IncidentStatus
 from communication.websocket_communication import WebSocketCommunication
-from typing import List
+
 
 class IncidentService:
-    """Service layer for incident operations"""
-    
-    def __init__(self, incident_repository: InMemoryIncidentRepository, communication_channel: WebSocketCommunication):
+    def __init__(
+        self,
+        incident_repository: InMemoryIncidentRepository,
+        communication_channel: WebSocketCommunication
+    ):
         self.incident_repository = incident_repository
         self.communication_channel = communication_channel
-    
-    def create_incident(self, x, y: float) -> Incident:
-        """
-        Create a new incident in the system
-        
-        Args:
-            x: X coordinate
-            y: Y coordinate
-        
-        Returns:
-            Created incident object
-        """
+
+    def create_incident(self, x: float, y: float) -> Incident:
         incident = Incident(
             x=x,
             y=y,
             status=IncidentStatus.CREATED
         )
         created_incident = self.incident_repository.create(incident)
-        
         return created_incident
-    
+
     def get_incident_by_id(self, incident_id: str):
-        """
-        Retrieve incident by ID from repository
-        
-        Args:
-            incident_id: ID of the incident to retrieve
-        
-        Returns:
-            Incident object if found, None otherwise
-        """
         return self.incident_repository.get_by_id(incident_id)
 
     def update_incident(self, incident_id: str, x: float, y: float):
-        """
-        Update incident coordinates
-
-        Args:
-            incident_id: ID of the incident
-            x: New x coordinate
-            y: New y coordinate
-        """
         incident = self.incident_repository.get_by_id(incident_id)
         if not incident:
             raise ValueError(f"Incident with ID {incident_id} does not exist.")
-        
         incident.x = x
         incident.y = y
         updated_incident = self.incident_repository.update(incident)
         return updated_incident
-        
-    def get_all_incidents(self) -> List[Incident]:
-        """
-        Get all incidents with optional status filtering
-        """
-        return self.incident_repository.get_all()
-    
-    def delete_incident(self, incident_id: str) -> bool:
-        """
-        Delete an incident from the system
-        
-        Args:
-            incident_id: The unique identifier of the incident to delete
-            
-        Returns:
-            True if incident was deleted successfully, False if incident was not found
-        """
-        return self.incident_repository.delete(incident_id)
-    
-    def get_open_incidents(self) -> List[Incident]:
-        """
-        Get all open incidents (not resolved)
-        
-        Returns:
-            List of open incidents
-        """
-        all_incidents = self.incident_repository.get_all()
-        open_incidents = [incident for incident in all_incidents if incident.status != IncidentStatus.RESOLVED]
-        return open_incidents
-    
-    async def dispatch_incident(self, incident_id: str):
-        """
-        Dispatch incident to all vehicles
-        
-        Args:
-            incident_id: ID of the incident        
-        Returns:
-            Dispatch result
-        """
-        incident = self.incident_repository.get_by_id(incident_id)
 
+    def get_all_incidents(self) -> List[Incident]:
+        return self.incident_repository.get_all()
+
+    def delete_incident(self, incident_id: str) -> bool:
+        return self.incident_repository.delete(incident_id)
+
+    def get_open_incidents(self) -> List[Incident]:
+        all_incidents = self.incident_repository.get_all()
+        open_incidents = [
+            incident for incident in all_incidents
+            if incident.status != IncidentStatus.RESOLVED
+        ]
+        return open_incidents
+
+    async def dispatch_incident(self, incident_id: str):
+        incident = self.incident_repository.get_by_id(incident_id)
         if incident is None:
             raise ValueError(f"Incident with ID {incident_id} does not exist.")
-        
-        # Notify ERT units about the incident and wait for acknowledgment
+        incident.status = IncidentStatus.DISPATCHED
+        self.incident_repository.update(incident)
         await self.communication_channel.publish(
-            topic="new_incident",
+
+             topic="incident",
             message=incident.to_dict()
         )
 
