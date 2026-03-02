@@ -8,11 +8,14 @@ from control_room.model.unit import Unit, UnitStatus
 from communication.websocket_communication import WebSocketCommunication
 from typing import List
 
+from control_room.service.incident_service import IncidentService
+
 class UnitService:
     """Service layer for unit operations"""
     
-    def __init__(self, unit_repository: InMemoryUnitRepository, communication_channel: WebSocketCommunication):
+    def __init__(self, unit_repository: InMemoryUnitRepository, incident_service: IncidentService, communication_channel: WebSocketCommunication):
         self.unit_repository = unit_repository
+        self.incident_service = incident_service
         self.communication_channel = communication_channel
     
     def create_unit(self,id, x, y: float) -> Unit:
@@ -105,4 +108,52 @@ class UnitService:
         
         unit.status = UnitStatus.RESOLVED
         updated_unit = self.unit_repository.update(unit)
+
+        incident_id = updated_unit.assigned_incident
+        if incident_id:
+            incident = self.incident_service.get_incident_by_id(incident_id)
+            if incident:
+                all_units = self.unit_service.get_all_units()
+                assigned_units = [
+                    u for u in all_units
+                    if u.assigned_incident == incident_id
+                ]
+                all_resolved = len(assigned_units) > 0 and all(
+                    u.status == UnitStatus.RESOLVED
+                    for u in assigned_units
+                )
+                if all_resolved:
+                    self.incident_service.resolve_incident(incident_id)
+                    print(f"[Control Room] \U0001f389 Incident {incident.id} resolved (all units resolved)")
+                else:
+                    print(f"[Control Room] \U0001f6a7 Incident {incident.id} still in progress (some units not resolved)")
+
+        return updated_unit
+    
+    def assign_incident_to_unit(self, unit_id: str, incident_id: str) -> Unit:
+        """
+        Assign an incident to a unit
+        
+        Args:
+            unit_id: ID of the unit
+            incident_id: ID of the incident to assign
+        
+        Returns:
+            The updated unit object
+        
+        Raises:
+            ValueError: If unit with given ID does not exist
+        """
+        unit = self.unit_repository.get_by_id(unit_id)
+        if not unit:
+            raise ValueError(f"Unit with ID {unit_id} does not exist.")
+        
+        unit.assigned_incident = incident_id
+        updated_unit = self.unit_repository.update(unit)
+
+        incident = self.incident_service.get_incident_by_id(incident_id)
+        if incident and incident.status == IncidentStatus.DISPATCHED:
+            incident.status = IncidentStatus.ACKNOWLEDGED
+            self.incident_repository.update(incident)
+
         return updated_unit

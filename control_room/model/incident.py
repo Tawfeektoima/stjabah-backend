@@ -12,7 +12,6 @@ class IncidentStatus(Enum):
     RESOLVED = "resolved"
     PENDING = "pending"
 
-
 class Incident:
     """Incident model"""
 
@@ -24,7 +23,6 @@ class Incident:
         created_at: Optional[datetime] = None,
         resolved_at: Optional[datetime] = None,
         id: Optional[str] = None,
-        assigned_units: Optional[list] = None
     ):
         self.id = id
         self.x = x
@@ -32,7 +30,6 @@ class Incident:
         self.status = status
         self.created_at = created_at
         self.resolved_at = resolved_at
-        self.assigned_units = assigned_units or []
 
     def to_dict(self) -> dict:
         """Convert incident to dictionary for JSON serialization"""
@@ -43,5 +40,4 @@ class Incident:
             'status': self.status.value,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'resolved_at': self.resolved_at.isoformat() if self.resolved_at else None,
-            'assigned_units': self.assigned_units
         }

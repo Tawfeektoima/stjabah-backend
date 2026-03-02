@@ -113,3 +113,23 @@ class IncidentService:
         )
 
         return True
+    
+# add method to update incident status when resolved by ERT unit
+    def resolve_incident(self, incident_id: str):
+        """
+        Mark an incident as resolved
+        
+        Args:
+            incident_id: ID of the incident to resolve
+            
+        Returns:
+            Updated incident object
+        """
+        incident = self.incident_repository.get_by_id(incident_id)
+        if not incident:
+            raise ValueError(f"Incident with ID {incident_id} does not exist.")
+        
+        incident.status = IncidentStatus.RESOLVED
+        updated_incident = self.incident_repository.update(incident)
+        
+        return updated_incident

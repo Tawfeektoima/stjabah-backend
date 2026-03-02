@@ -10,7 +10,6 @@ class UnitStatus(Enum):
     RESOLVED = "resolved"
     UNAVAILABLE = "unavailable"
 
-
 class Unit:
     """Unit model"""
 
@@ -19,12 +18,14 @@ class Unit:
         id: str,
         x: float,
         y: float,
-        status: 'UnitStatus' = None
+        status: 'UnitStatus' = None,
+        assigned_incident: Optional[str] = None
     ):
         self.id = id
         self.x = x
         self.y = y
         self.status = status or UnitStatus.ACTIVE
+        self.assigned_incident = assigned_incident
 
     def to_dict(self) -> dict:
         """Convert unit to dictionary for JSON serialization"""
@@ -32,5 +33,6 @@ class Unit:
             'id': self.id,
             'x': self.x,
             'y': self.y,
-            'status': self.status.value
+            'status': self.status.value,
+            'assigned_incident': self.assigned_incident
         }

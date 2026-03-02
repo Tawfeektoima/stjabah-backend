@@ -235,14 +235,15 @@ def get_units_for_open_incident():
     try:
         open_incidents = control_room_bp.incident_service.get_open_incidents()
         
+        if not open_incidents:
+            return jsonify({}), 200  # Return empty JSON if no open incidents
+        
         incident = open_incidents[0]
-        assigned_units = incident.assigned_units
-        # show all the info of the assigned units from the unit service
-        assigned_units_info = []
-        for unit_id in assigned_units:
-            unit = control_room_bp.unit_service.get_unit_by_id(unit_id)
-            if unit:
-                assigned_units_info.append(unit.to_dict())
+        all_units = control_room_bp.unit_service.get_all_units()
+        assigned_units_info = [
+            unit.to_dict() for unit in all_units
+            if unit.assigned_incident == incident.id
+        ]
         
         return jsonify(assigned_units_info), 200
             
