@@ -1,14 +1,7 @@
 {
-    "id": "ERT-001",
-    "x": 74.96326883907271,
-    "y": 94.92491820988838,
-    "status": "dispatched",
-    "assigned_incident": {
-        "id": "e8bcc409-1b99-4172-b88e-4be39b0a8378",
-        "x": 10,
-        "y": 20,
-        "status": "dispatched",
-        "created_at": "2026-02-25T23:53:37.381041",
-        "resolved_at": null
-    }
+  "assigned_incident": null,
+  "id": "ERT-001",
+  "status": "dispatched",
+  "x": 0.5134,
+  "y": 0.4669
 }

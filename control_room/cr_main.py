@@ -51,13 +51,13 @@ class ControlRoomApplication:
         # Unit service used by handlers (optional for IncidentService)
         self.unit_service = UnitService(
             unit_repository=self.unit_repository,
+            incident_service=self.incident_service,
             communication_channel=self.communication_channel
         )
 
         # Handlers for websocket topics
         self.websocket_handlers = WebSocketHandlers(
             incident_service=self.incident_service,
-            incident_repository=self.incident_repository,
             unit_service=self.unit_service
         )
         
@@ -148,7 +148,7 @@ class ControlRoomApplication:
         self.app.run(
             host='127.0.0.1',
             port=5001,
-            debug=False,  # Set to False to avoid double startup messages
+            debug=True,  # Set to False to avoid double startup messages
             use_reloader=False  # Disable reloader in threaded mode
         )
     

@@ -12,7 +12,6 @@ class IncidentStatus(Enum):
     RESOLVED = "resolved"
     PENDING = "pending"
 
-
 class Incident:
     """Incident model"""
 

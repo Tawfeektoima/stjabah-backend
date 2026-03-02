@@ -10,7 +10,6 @@ class UnitStatus(Enum):
     RESOLVED = "resolved"
     UNAVAILABLE = "unavailable"
 
-
 class Unit:
     """Unit model"""
 

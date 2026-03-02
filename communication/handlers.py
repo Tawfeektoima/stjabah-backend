@@ -8,9 +8,8 @@ from typing import Any
 from control_room.model.unit import UnitStatus
 
 class WebSocketHandlers:
-    def __init__(self, incident_service, incident_repository, unit_service=None):
+    def __init__(self, incident_service, unit_service=None):
         self.incident_service = incident_service
-        self.incident_repository = incident_repository
         self.unit_service = unit_service
 
     async def handle_location(self, data: dict):
@@ -30,6 +29,8 @@ class WebSocketHandlers:
         print(f"[Control Room] \u2705 Acknowledgment: {data}")
         ert_id = data.get("ert_id")
         incident_id = data.get("incident_id")
+
+        # Ensure the unit exists in the system, if not create it (for testing purposes)
         if self.unit_service:
             try:
                 unit = self.unit_service.get_unit_by_id(ert_id)
@@ -37,19 +38,19 @@ class WebSocketHandlers:
                     self.unit_service.create_unit(ert_id, data.get("x"), data.get("y"))
             except Exception as e:
                 print(f"[Control Room] \u274c Failed to create ERT Unit: {ert_id} ({e})")
+
+        # Assign the incident to the unit in the service layer
         if self.unit_service:
             try:
                 self.unit_service.assign_incident_to_unit(ert_id, incident_id)
             except Exception as e:
                 print(f"[Control Room] \u274c Failed to assign incident to unit {ert_id}: {e}")
-        incident = self.incident_service.get_incident_by_id(incident_id)
-        if incident and incident.status == IncidentStatus.DISPATCHED:
-            incident.status = IncidentStatus.ACKNOWLEDGED
-            self.incident_repository.update(incident)
 
     async def handle_resolution(self, data: dict):
         print(f"[Control Room] \U0001f389 Resolution: {data}")
         ert_id = data.get("ert_id")
+
+        # Mark the unit as resolved in the service layer
         if self.unit_service:
             try:
                 unit = self.unit_service.get_unit_by_id(ert_id)
@@ -75,8 +76,8 @@ class WebSocketHandlers:
                             else:
                                 print(f"[Control Room] \U0001f6a7 Incident {incident.id} still in progress (some units not resolved)")
             except Exception as e:
-                print(f"[Control Room] \u274c Failed to update")
-
+                print(f"[Control Room] \u274c Failed to resolve unit {ert_id}: {e}")
+                
     async def handle_disconnection(self, ert_id: str):
         try:
             if self.unit_service:
